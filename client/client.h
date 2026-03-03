@@ -2,6 +2,8 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
+#include "../vendored/SDL_ttf/include/SDL3_ttf/SDL_ttf.h"
+// #include "SDL3_ttf/SDL_ttf.h"
 #include "uv.h"
 #include <SDL3/SDL_rect.h>
 #include <SDL3/SDL_render.h>
@@ -61,6 +63,7 @@ typedef struct {
 	char opponent_username[MAX_USERNAME_CHARS];
 	fr_handler handlers[5];
 	frames_t frame_data;
+	TTF_Font * font;
 } App;
 
 

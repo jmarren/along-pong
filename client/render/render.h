@@ -31,7 +31,9 @@ typedef struct {
 
 void render_circle(SDL_Renderer* renderer, Circle* circle);
 void render_line(SDL_Renderer* renderer, line* line);
-void render_text(App* app, text_component* text_rect);
+// void render_text(App* app, text_component* text_rect);
+void init_font(App* app);
+
 #endif
 
 
