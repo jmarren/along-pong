@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include "../client.h"
 #include "SDL3/SDL_render.h"
+#include "render/render.h"
 
 #define TITLE_H 10
 #define TITLE_TEXT "enter your username"
@@ -53,7 +54,7 @@ static void init_title(fr_enter_username* frame) {
 
 
 static void init(App* app) {
-	// init_title(&(app->frame_data.enter_username));
+	init_title(&(app->frame_data.enter_username));
 }
 
 
@@ -86,6 +87,7 @@ static void render(App* app) {
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	SDL_RenderLine(renderer, 100.0, 200.0, 150.0, 250.0);
     	SDL_RenderDebugText(renderer, 100, 100, "hi there");
+	render_text(app, &(app->frame_data.enter_username.title_component));
 }
 
 

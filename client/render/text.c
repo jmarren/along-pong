@@ -12,7 +12,7 @@ static TTF_Font *font = NULL;
 extern unsigned char tiny_ttf[];
 extern unsigned int tiny_ttf_len;
 
-void text_render(App* app, text_component* component) {
+void render_text(App* app, text_component* component) {
 	if (strlen(component->text) <= 0) return;
 
 
