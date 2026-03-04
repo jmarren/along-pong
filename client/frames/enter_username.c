@@ -2,11 +2,11 @@
 #include <SDL3/SDL_keyboard.h>
 #include <SDL3/SDL_oldnames.h>
 #include <SDL3/SDL_rect.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include "../client.h"
 #include "SDL3/SDL_render.h"
-#include "render/render.h"
+#include <render.h>
+
 
 #define TITLE_H 10
 #define TITLE_TEXT "enter your username"
@@ -17,6 +17,7 @@
 #define FR_MARGIN_TOP 100
 
 
+// title rect ("enter username")
 static SDL_FRect title_rect = (SDL_FRect){
 		.x = FR_MARGIN_LEFT,
 		.y = FR_MARGIN_TOP,
@@ -54,40 +55,80 @@ static void init_title(fr_enter_username* frame) {
 
 
 static void init(App* app) {
-	init_title(&(app->frame_data.enter_username));
+	SDL_StartTextInput(app->window);
+
+	fr_enter_username* fr = &(app->frame_data.enter_username);
+	init_title(fr);
+	init_text_input(fr);
 }
 
 
+static void handle_backspace(fr_enter_username* frame) {
+	int len = strlen(frame->input_component.text);
+	if (len > 0) {
+		frame->input_component.text[len - 1] = '\0';
+	}
+}
+
+static void handle_return(App* app) {
+	// stop taking input
+	SDL_StopTextInput(app->window);
+
+	// copy text_input to username
+	strncpy(app->username, app->frame_data.enter_username.input_component.text, 25);
+
+	// set game phase to pointing
+	app->current_frame = select_opponent;
+	
+	// tcp_write_msg_1("username", app->username);
+	//
+	// tcp_write_msg_1("query", "players");
+}
+
+static void handle_text_input(fr_enter_username* frame, SDL_Event* event) {
+	int len = strlen(frame->input_component.text);
+	if (len < MAX_USERNAME_CHARS) {
+		strcat(frame->input_component.text, event->text.text);
+	}
+}
+
+
+
+
+
+
 static void input(App* app, SDL_Event* event) {
+	fr_enter_username* fr = &(app->frame_data.enter_username);
 	if (event->type == SDL_EVENT_KEY_DOWN) {
 		SDL_Keycode key = event->key.key;
 
 		switch (key) {
 			case SDLK_BACKSPACE:
-				printf("backspace\n");
+				handle_backspace(fr);
 				break;
 			case SDLK_RETURN:
-				printf("return\n");
+				handle_return(app);
 				break;
 		}
 	}
 	if (event->type == SDL_EVENT_TEXT_INPUT) {
-		printf("text input\n");
+		handle_text_input(fr, event);
 	}
 }
 
 
 
 static void render(App* app) {
+	fr_enter_username* fr = &(app->frame_data.enter_username);
 	SDL_Renderer* renderer = app->renderer;
+
 	// clear the screen w/ black
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
         SDL_RenderClear(renderer);
+
 	// draw line and text with white
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-	SDL_RenderLine(renderer, 100.0, 200.0, 150.0, 250.0);
-    	SDL_RenderDebugText(renderer, 100, 100, "hi there");
-	render_text(app, &(app->frame_data.enter_username.title_component));
+	render_text(app, &(fr->title_component));
+	render_text(app, &(fr->input_component));
 }
 
 

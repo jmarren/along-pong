@@ -1,62 +1,39 @@
+# add the Client executable
 add_executable(Client)
 
-add_library(Render)
+# add render library and subdirectory
+add_library(render)
+add_subdirectory(render)
 
-target_sources(
-	Render
-	PRIVATE 
-	render/circle.c
-	render/line.c
-	render/font.c
-	render/text.c	
+# add frames library and subdirectory
+add_library(frames)
+add_subdirectory(frames)
 
-	# PUBLIC allows consumers of the library
-	# to "see" the library's header files
-	PUBLIC
-	FILE_SET HEADERS
-	FILES 
-	render/render.h
-	client.h
-
-)
-
+add_library(net_client)
+add_subdirectory(net)
 
 target_link_libraries(
-	Render
+	net_client
+	PUBLIC
+	protocol
+)
+
+# link the render library as a dependency of the frames library
+target_link_libraries(
+	frames 
+	PRIVATE 
+	render
+)
+
+# include the render directory when building frames library
+target_include_directories(
+	frames 
 	PUBLIC 
-	SDL3_ttf::SDL3_ttf
-)
-
-add_library(Frames)
-
-
-target_sources(
-	Frames
-	PRIVATE
-	frames/enter_username.c
-	render/text.c
-
-	# PUBLIC allows consumers of the library
-	# to "see" the library's header files
-	PUBLIC
-	FILE_SET HEADERS
-	FILES 
-	frames/frames.h
-	render/render.h
+	render
 )
 
 
-
-target_link_libraries(
-	Frames 
-	PRIVATE 
-	Render
-)
-
-
-
-
-
+# add sources for the client executable
 target_sources(
 	Client
 	PRIVATE
@@ -65,16 +42,21 @@ target_sources(
 )
 
 
+# include the frames directory when building Client
+target_include_directories(
+	Client 
+	PRIVATE 
+	frames 
+)
 
-
-# # Link to the actual SDL3 library.
-# target_link_libraries(hello PRIVATE SDL3_ttf::SDL3_ttf SDL3::SDL3)
+# link required libraries as dependencies of the Client executable
 target_link_libraries(
 	Client
 	PRIVATE 
-	SDL3_ttf::SDL3_ttf
 	SDL3::SDL3
-	Frames
-	Render
+	frames
+	render
+	protocol
+	net_client
 )
 

@@ -5,8 +5,8 @@
 #include <SDL3/SDL_init.h>
 #include <stdio.h>
 #include "client.h"
-#include "frames/frames.h"
-#include "render/render.h"
+#include <render.h>
+#include <frames.h>
 
 App app;
 
@@ -42,14 +42,7 @@ int main(void) {
 
 	app.current_frame = enter_username;
 
-
-
-    	SDL_RenderDebugText(app.renderer, 10, 100, "hi there");
-	//
 	loop_start(&app);
-
-
-
 
 	return 0;
 }

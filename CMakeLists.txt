@@ -26,28 +26,48 @@ set(SDLTTF_VENDORED OFF)
 
 # This assumes the SDL_ttf source is available in vendored/SDL_ttf
 add_subdirectory(vendored/SDL_ttf EXCLUDE_FROM_ALL)
+add_subdirectory(vendored/libuv EXCLUDE_FROM_ALL)
+
+
+add_library(protocol)
+add_subdirectory(protocol)
 
 
 # add client and server subdirectories
 add_subdirectory(client)
 add_subdirectory(server)
 
-# include the include directory for shared header files
+# include the protocol and vendored directories for building net_server
+target_include_directories(
+	net_server
+	PUBLIC
+	protocol
+	include
+)
+
+# include the protocol and vendored directories for building net_client
+target_include_directories(
+	net_client
+	PUBLIC
+	protocol
+)
+
+
+# include the include directory, vendored and protocol when building Client
 target_include_directories(
 	Client 
 	PRIVATE
 	include
+	vendored
+	protocol
 )
 
-
-
-# include the include directory for shared header files
+# include the include directory, vendored and protocol when building Server
 target_include_directories(
-	Server 
+	Server
 	PRIVATE
 	include
+	protocol
 )
-
-
 
 

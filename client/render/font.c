@@ -1,5 +1,5 @@
-#include "../../vendored/SDL_ttf/include/SDL3_ttf/SDL_ttf.h"
 #include "../client.h"
+#include <SDL3_ttf/SDL_ttf.h>
 
 static TTF_Font *font = NULL;
 
