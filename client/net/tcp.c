@@ -1,7 +1,9 @@
 
 
+#include "net.h"
 #include "uv.h"
 #include <SDL3/SDL_events.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include "../client.h"
 #include <protocol.h>
@@ -16,7 +18,7 @@ static Uint32 read_event_type;
  * callback to fire after writing to tcp connection 
  * frees write request struct
  **/
-void on_write_end(uv_write_t *write_req, int status) {
+static void on_write_end(uv_write_t *write_req, int status) {
     // handle failed status
     if (status == -1) {
         fprintf(stderr, "error on_write_end");
@@ -32,7 +34,7 @@ void on_write_end(uv_write_t *write_req, int status) {
  * creates an SDL_UserEvent with registered read event type
  * and pushes it to the SDL loop with message copied to event.data1
  **/
-void read_data(uv_stream_t* stream, ssize_t nread, const uv_buf_t* buf) {
+static void read(uv_stream_t* stream, ssize_t nread, const uv_buf_t* buf) {
 
    // if < 0 bytes read, log and close the connection
    if (nread < 0) {
@@ -73,7 +75,7 @@ void read_data(uv_stream_t* stream, ssize_t nread, const uv_buf_t* buf) {
 
 
 /* write a string to the tcp connection  */
-void tcp_write(char *message) {
+static void write(char *message) {
 
     // initialize write buffer
     uv_buf_t buf;
@@ -92,29 +94,20 @@ void tcp_write(char *message) {
 /* ----------------- PUBLIC ------------------ */
 
 /* write a message type and content to the connection */
-void tcp_write_msg_1(char* type, char* content) {
+static void write_message(char* type, char* content) {
 
 	// encode to protocol format 
 	char* str = encode_message(type, content);
 
 	// write to connection
-	tcp_write(str);
-
-}
-
-/* writes a message to the tcp connection  */
-void tcp_write_msg_2(message* msg) {
-
-	char* str = encode_message(msg->type, msg->content);
-
-	// write request string to connection
-	tcp_write(str);
+	write(str);
 }
 
 
 
 /* handles a new tcp connection to the server */
-void on_connect(uv_connect_t *new_req, int status) {
+static void on_connect(uv_connect_t *new_req, int status) {
+	
     // handle failed status
     if (status == -1) {
         fprintf(stderr, "error on_write_end");
@@ -125,7 +118,7 @@ void on_connect(uv_connect_t *new_req, int status) {
     req = new_req;
 
     // start the read callback
-    uv_read_start(req->handle, buffer_alloc_uv_handle, read_data);
+    uv_read_start(req->handle, buffer_alloc_uv_handle, read);
 }
 
 
@@ -136,7 +129,7 @@ void on_connect(uv_connect_t *new_req, int status) {
  * init tcp handle
  * connect to server destination address
  **/
-void tcp_init(App* app) {
+static void init(App* app) {
 
     // save a reference to the read event type locally
     read_event_type = app->read_event_type;
@@ -162,3 +155,9 @@ void tcp_init(App* app) {
     // no need to connect udp
     uv_tcp_connect(connect, tcp_sock, (const struct sockaddr*)&tcp_dest, on_connect);
 }
+
+
+extern tcp_t tcp = (tcp_t){
+	.init = init,
+	.write_msg = write_message,
+};

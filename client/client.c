@@ -2,11 +2,14 @@
 #include "SDL3/SDL_render.h"
 #include "SDL3/SDL_video.h"
 #include "macro.h"
+#include "net/net.h"
 #include <SDL3/SDL_init.h>
+#include <pthread.h>
 #include <stdio.h>
 #include "client.h"
 #include <render.h>
 #include <frames.h>
+#include "../layout/layout.h"
 
 App app;
 
@@ -34,6 +37,8 @@ void init_sdl(void) {
 
 int main(void) {
 
+
+
 	init_sdl();
 
 	init_font(&app);
@@ -41,6 +46,17 @@ int main(void) {
 	app.handlers[enter_username] = h_enter_username;
 
 	app.current_frame = enter_username;
+
+	pthread_t thread_id;
+
+	// TODO:  Use specialized lib threads instead
+  	int result = pthread_create(&thread_id, NULL, (void*)&net_start, &app);
+
+        if (result != 0) {
+		perror("Failed to create thread");
+		return 1;
+	}
+
 
 	loop_start(&app);
 

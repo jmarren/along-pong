@@ -47,6 +47,7 @@ target_include_directories(
 	Client 
 	PRIVATE 
 	frames 
+	net
 )
 
 # link required libraries as dependencies of the Client executable
@@ -58,5 +59,6 @@ target_link_libraries(
 	render
 	protocol
 	net_client
+	layout
 )
 

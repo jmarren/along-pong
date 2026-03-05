@@ -6,6 +6,8 @@
 #include "../client.h"
 #include "SDL3/SDL_render.h"
 #include <render.h>
+#include "../net/net.h"
+#include "../../layout/layout.h"
 
 
 #define TITLE_H 10
@@ -77,8 +79,12 @@ static void handle_return(App* app) {
 	// copy text_input to username
 	strncpy(app->username, app->frame_data.enter_username.input_component.text, 25);
 
+	// write the username to the tcp connection
+	tcp.write_msg("username", app->username);
+
 	// set game phase to pointing
 	app->current_frame = select_opponent;
+
 	
 	// tcp_write_msg_1("username", app->username);
 	//
@@ -119,12 +125,65 @@ static void input(App* app, SDL_Event* event) {
 
 
 static void render(App* app) {
+
+	SDL_FRect root_rect = (SDL_FRect){
+		.h = 100,
+		.w = 100,
+		.x = 100,
+		.y = 100,
+	};
+
+	
+	renderable root_elt = (renderable){
+		.elt = (void*)&root_rect,
+		.color = SDL_COLOR_BLUE,
+		.render = (render_func*)&SDL_RenderRect,
+	};
+
+	SDL_FRect child_rect = (SDL_FRect){
+		.h = 200,
+		.w = 200,
+		.x = 100,
+		.y = 100,
+	};
+
+
+
+	renderable child_elt = (renderable){
+		.elt = (void*)&child_rect,
+		.color = SDL_COLOR_YELLOW,
+		.render = (render_func*)&SDL_RenderRect,
+	};
+
+	Node child_node = (Node) {
+		.id = 1,
+		.num_children = 0,
+		.element = child_elt,
+		.children = NULL,
+	};
+
+	Node* ref_child_node = &child_node;
+	
+	
+	Node root_node = (Node) {
+		.id = 0,
+		.element = root_elt,
+		.num_children = 1,
+		.children = (struct Node**)&ref_child_node,
+	};
+
+
 	fr_enter_username* fr = &(app->frame_data.enter_username);
 	SDL_Renderer* renderer = app->renderer;
 
 	// clear the screen w/ black
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
         SDL_RenderClear(renderer);
+
+	SDL_SetRenderDrawColor(renderer, 100, 100, 100, 100);
+
+	render_root(renderer, &root_node);
+
 
 	// draw line and text with white
 	render_text(app, &(fr->title_component));

@@ -1,0 +1,27 @@
+
+
+#include "uv.h"
+#include <SDL3/SDL_events.h>
+#include <stddef.h>
+#include "net.h"
+#include "../client.h"
+
+
+void net_start(App* app) {
+
+    // create default loop
+    app->loop = uv_default_loop();
+
+    tcp.init(app);
+
+    // initialize udp and tcp
+    // udp_init(app);
+    // tcp_init(app);
+	
+    // run the loop
+    uv_run(app->loop, UV_RUN_DEFAULT); // 8. Run the Event Loop
+}
+
+
+
+

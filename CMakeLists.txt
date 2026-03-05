@@ -2,9 +2,6 @@ cmake_minimum_required(VERSION 3.16)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(CMAKE_INCLUDE_PATH vendored/SDL_ttf/include)
-
-
 # Create symlink to compile_commands.json for IDE to pick it up
 execute_process(
 COMMAND ${CMAKE_COMMAND} -E create_symlink
@@ -29,15 +26,21 @@ add_subdirectory(vendored/SDL_ttf EXCLUDE_FROM_ALL)
 add_subdirectory(vendored/libuv EXCLUDE_FROM_ALL)
 
 
+# add protocol library and subdirectory
 add_library(protocol)
 add_subdirectory(protocol)
+
+
+add_library(layout)
+add_subdirectory(layout)
 
 
 # add client and server subdirectories
 add_subdirectory(client)
 add_subdirectory(server)
 
-# include the protocol and vendored directories for building net_server
+
+# include the protocol and include directories for building net_server
 target_include_directories(
 	net_server
 	PUBLIC
@@ -60,6 +63,7 @@ target_include_directories(
 	include
 	vendored
 	protocol
+	layout
 )
 
 # include the include directory, vendored and protocol when building Server
